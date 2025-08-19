@@ -1,7 +1,7 @@
 // Cloudflare Pages Functions run on Workers (no Node.js stdlib),
-// so we cannot use 'docx' package here. We'll return a plain text DOCX-like
-// fallback by generating a minimal Word-compatible document using HTML (MHT is not allowed).
-// Simplest approach: return a .txt with Word MIME so users can open in Word.
+// so we cannot use 'docx' package here. We'll return a Word-compatible
+// .doc file by embedding HTML content with the correct MIME type so
+// Microsoft Word opens it properly.
 
 export async function onRequestPost({ request }) {
   try {
@@ -13,23 +13,13 @@ export async function onRequestPost({ request }) {
       });
     }
 
-    let txtContent = 'DANH SÁCH CÂU HỎI\n';
-    txtContent += '='.repeat(50) + '\n\n';
-    for (const q of questions) {
-      txtContent += `Câu ${q.id}:\n`;
-      txtContent += `${sanitize(String(q.question || ''))}\n\n`;
-      txtContent += 'Đáp án:\n';
-      (q.answers || []).forEach((a, idx) => {
-        const option = String.fromCharCode(65 + idx);
-        txtContent += `${option}. ${sanitize(String(a.answer || ''))}\n`;
-      });
-      txtContent += '\n' + '-'.repeat(30) + '\n\n';
-    }
+    const html = buildWordHtml(questions);
 
-    return new Response(txtContent, {
+    return new Response(html, {
       headers: {
-        'content-type': 'text/plain; charset=utf-8',
-        'content-disposition': 'attachment; filename="questions.txt"'
+        // application/msword works broadly for .doc
+        'content-type': 'application/msword; charset=utf-8',
+        'content-disposition': 'attachment; filename="questions.doc"'
       }
     });
   } catch (err) {
@@ -40,28 +30,39 @@ export async function onRequestPost({ request }) {
   }
 }
 
-function sanitize(text) {
+function buildWordHtml(questions) {
+  const rows = questions.map((q) => {
+    const answers = (q.answers || []).map((a, i) => `${String.fromCharCode(65 + i)}. ${escapeHtml(String(a.answer || ''))}`).join('<br/>');
+    return `
+      <p style="margin:8pt 0; font-size:12pt;"><b>Câu ${escapeHtml(String(q.id))}:</b> ${escapeHtml(String(q.question || ''))}</p>
+      <div style="margin:4pt 0 12pt 18pt; font-size:12pt;">${answers}</div>
+    `;
+  }).join('\n');
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Danh sách câu hỏi</title>
+<style>
+body { font-family: "Times New Roman", serif; }
+h1 { text-align:center; margin: 12pt 0 18pt 0; }
+</style>
+</head>
+<body>
+<h1><b>DANH SÁCH CÂU HỎI</b></h1>
+${rows}
+</body>
+</html>`;
+}
+
+function escapeHtml(text) {
   return text
-    .replace(/<o:p[^>]*>/gi, '')
-    .replace(/<\/o:p>/gi, '')
-    .replace(/<br\s*\/?>(\n)?/gi, ' ')
-    .replace(/<p[^>]*>/gi, '')
-    .replace(/<\/p>/gi, '')
-    .replace(/<span[^>]*>/gi, '')
-    .replace(/<\/span>/gi, '')
-    .replace(/<div[^>]*>/gi, '')
-    .replace(/<\/div>/gi, '')
-    .replace(/<strong[^>]*>/gi, '')
-    .replace(/<\/strong>/gi, '')
-    .replace(/<b[^>]*>/gi, '')
-    .replace(/<\/b>/gi, '')
-    .replace(/<i[^>]*>/gi, '')
-    .replace(/<\/i>/gi, '')
-    .replace(/<u[^>]*>/gi, '')
-    .replace(/<\/u>/gi, '')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 
