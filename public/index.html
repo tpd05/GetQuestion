@@ -231,7 +231,16 @@
     </div>
 
     <!-- docx library for client-side Word export -->
-    <script src="https://unpkg.com/docx@9.5.1/build/index.umd.js"></script>
+    <script src="https://unpkg.com/docx@9.5.1/build/index.umd.js" crossorigin="anonymous"></script>
+    <script>
+    (function fallbackDocx(){
+        if (window.docx) return;
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/docx@9.5.1/build/index.umd.js';
+        s.crossOrigin = 'anonymous';
+        document.head.appendChild(s);
+    })();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
