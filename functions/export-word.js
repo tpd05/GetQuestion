@@ -34,7 +34,7 @@ function buildWordHtml(questions) {
   const rows = questions.map((q) => {
     const answers = (q.answers || []).map((a, i) => `${String.fromCharCode(65 + i)}. ${escapeHtml(String(a.answer || ''))}`).join('<br/>');
     return `
-      <p style="margin:8pt 0; font-size:12pt;"><b>Câu ${escapeHtml(String(q.id))}:</b> ${escapeHtml(String(q.question || ''))}</p>
+      <p style="margin:8pt 0; font-size:12pt;"><b>Câu ${escapeHtml(String(q.id))}: ${escapeHtml(String(q.question || ''))}</b></p>
       <div style="margin:4pt 0 12pt 18pt; font-size:12pt;">${answers}</div>
     `;
   }).join('\n');
