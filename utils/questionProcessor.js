@@ -3,7 +3,7 @@
  * Handles the processing of JSON data to extract and format questions
  */
 
-function processQuestions(data) {
+function processQuestions(data, options = {}) {
   const output = [];
   const seenIds = new Set(); // Set to track seen IDs
   const dataGet = data['data'];
@@ -18,6 +18,11 @@ function processQuestions(data) {
     throw new Error('Invalid data format: test array is missing or empty');
   }
   
+  // Options with defaults aligned to functions/upload.js
+  const removeDuplicates = options.removeDuplicates !== false; // default true
+  const filterImages = options.filterImages === true; // default false
+  const cleanHtml = options.cleanHtml !== false; // default true
+  
   let count = 0; // Counter for valid questions
 
   // Function to clean HTML content
@@ -25,7 +30,7 @@ function processQuestions(data) {
     if (!htmlContent) return '';
     
     // Remove unnecessary HTML tags but keep content
-    let cleaned = htmlContent
+    let cleaned = String(htmlContent)
       .replace(/<p[^>]*>/gi, '') // Remove <p> tags
       .replace(/<\/p>/gi, '') // Remove closing </p> tags
       .replace(/<span[^>]*>/gi, '') // Remove <span> tags
@@ -42,13 +47,16 @@ function processQuestions(data) {
       .replace(/<\/u>/gi, '') // Remove closing </u> tags
       .replace(/<o:p[^>]*>/gi, '') // Remove <o:p> tag
       .replace(/<\/o:p>/gi, '') // Remove closing </o:p>
-      .replace(/<br\s*\/?>/gi, ' ') // Replace <br> with space
+      .replace(/<br\s*\/?>(\n)?/gi, ' ') // Replace <br> with space
       .replace(/&nbsp;/gi, ' ') // Replace &nbsp; with space
       .replace(/\s+/g, ' ') // Remove extra whitespace
       .trim(); // Remove leading/trailing whitespace
     
     return cleaned;
   }
+
+  // Detect image tags on raw content
+  const containsImageTag = (content) => /<img\s[^>]*src=/i.test(String(content));
 
   // Function to validate question data
   function validateQuestion(question) {
@@ -72,27 +80,31 @@ function processQuestions(data) {
       }
 
       const idQuestion = question["id"];
-      const questionDirection = cleanHtmlContent(question['question_direction']);
-      const answers = question['answer_option'].map(a => ({
+
+      // If filtering images, check RAW contents prior to cleaning
+      if (filterImages) {
+        const rawQ = String(question['question_direction'] || '');
+        const rawAnswers = (question['answer_option'] || []).map(a => String(a['value'] || ''));
+        const hasImg = containsImageTag(rawQ) || rawAnswers.some(v => containsImageTag(v));
+        if (hasImg) return;
+      }
+
+      const questionDirection = cleanHtml ? cleanHtmlContent(question['question_direction']) : String(question['question_direction'] || '');
+      const answers = (question['answer_option'] || []).map(a => ({
         id: a['id'],
-        answer: cleanHtmlContent(a['value'])
+        answer: cleanHtml ? cleanHtmlContent(a['value']) : String(a['value'] || '')
       }));
 
-      // Check if question contains images
-      const containsImage = questionDirection.includes('<img') || 
-                           answers.some(answer => answer.answer.includes('<img'));
+      if (removeDuplicates && seenIds.has(idQuestion)) return;
+      if (removeDuplicates) seenIds.add(idQuestion);
 
-      // If no images and ID hasn't been seen, add to output
-      if (!containsImage && !seenIds.has(idQuestion)) {
-        seenIds.add(idQuestion);
-        output.push({
-          id: count + 1,
-          originalId: idQuestion,
-          question: questionDirection,
-          answers: answers
-        });
-        count++;
-      }
+      output.push({
+        id: count + 1,
+        originalId: idQuestion,
+        question: questionDirection,
+        answers: answers
+      });
+      count++;
     } catch (error) {
       console.error(`Error processing question at index ${index}:`, error);
     }
