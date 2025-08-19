@@ -1,0 +1,82 @@
+{
+  "data": [
+    {
+      "test": [
+        {
+          "id": "q1",
+          "question_direction": "What is the capital of France?",
+          "answer_option": [
+            {
+              "id": "a1",
+              "value": "London"
+            },
+            {
+              "id": "a2",
+              "value": "Paris"
+            },
+            {
+              "id": "a3",
+              "value": "Berlin"
+            },
+            {
+              "id": "a4",
+              "value": "Madrid"
+            }
+          ],
+          "category": "Geography",
+          "difficulty": "Easy"
+        },
+        {
+          "id": "q2",
+          "question_direction": "Which planet is closest to the Sun?",
+          "answer_option": [
+            {
+              "id": "a5",
+              "value": "Venus"
+            },
+            {
+              "id": "a6",
+              "value": "Mercury"
+            },
+            {
+              "id": "a7",
+              "value": "Earth"
+            },
+            {
+              "id": "a8",
+              "value": "Mars"
+            }
+          ],
+          "category": "Science",
+          "difficulty": "Medium"
+        },
+        {
+          "id": "q3",
+          "question_direction": "What is 2 + 2?",
+          "answer_option": [
+            {
+              "id": "a9",
+              "value": "3"
+            },
+            {
+              "id": "a10",
+              "value": "4"
+            },
+            {
+              "id": "a11",
+              "value": "5"
+            },
+            {
+              "id": "a12",
+              "value": "6"
+            }
+          ],
+          "category": "Mathematics",
+          "difficulty": "Easy"
+        }
+      ]
+    }
+  ]
+}
+
+

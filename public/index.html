@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Hệ Thống Xử Lý Câu Hỏi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-brain"></i>
+                <span>Question Processor</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="showHome()">
+                        <i class="fas fa-home"></i> Trang Chủ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="showQuestionProcessor()">
+                        <i class="fas fa-cogs"></i> JSON Question Process
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home Section -->
+        <section id="home-section" class="home-section">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="greeting" id="greeting">Xin chào!</span>
+                        <span class="time" id="current-time">00:00</span>
+                    </h1>
+                    <p class="hero-subtitle">Hệ thống xử lý và quản lý câu hỏi thông minh</p>
+                </div>
+                
+                <!-- Weather Widget -->
+                <div class="weather-widget" id="weather-widget">
+                    <div class="weather-header">
+                        <i class="weather-icon" id="weather-icon">🌤️</i>
+                        <div class="weather-info">
+                            <div class="temperature" id="temperature">--°C</div>
+                            <div class="weather-desc" id="weather-desc">Đang tải...</div>
+                        </div>
+                    </div>
+                    <div class="weather-location" id="weather-location">
+                        Đang xác định vị trí...
+                    </div>
+                    <div class="weather-details">
+                        <div class="weather-item">
+                            <i class="fas fa-tint"></i>
+                            <span id="humidity">--%</span>
+                        </div>
+                        <div class="weather-item">
+                            <i class="fas fa-wind"></i>
+                            <span id="wind-speed">-- km/h</span>
+                        </div>
+                    </div>
+                    <div class="weather-actions">
+                        <button class="weather-test-btn" onclick="testWeatherAPI()">
+                            <i class="fas fa-sync-alt"></i> Test API
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h3>Tải lên dữ liệu</h3>
+                    <p>Hỗ trợ nhiều định dạng file và dữ liệu JSON</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h3>Xử lý thông minh</h3>
+                    <p>Tự động làm sạch và tối ưu hóa dữ liệu</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3>Xuất đa định dạng</h3>
+                    <p>Hỗ trợ Word và Text với chất lượng cao</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Thống kê chi tiết</h3>
+                    <p>Báo cáo và phân tích dữ liệu toàn diện</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2>Thao tác nhanh</h2>
+                <div class="action-buttons">
+                    <button class="action-btn primary" onclick="showQuestionProcessor()">
+                        <i class="fas fa-play"></i>
+                        Bắt đầu xử lý
+                    </button>
+                    <button class="action-btn secondary" onclick="showHelp()">
+                        <i class="fas fa-question-circle"></i>
+                        Hướng dẫn sử dụng
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Question Processor Section (Hidden by default) -->
+        <section id="question-processor-section" class="question-processor-section" style="display: none;">
+            <div class="container">
+                <h2>JSON Question Processor</h2>
+                <p class="description">Tải lên và xử lý dữ liệu câu hỏi từ file JSON hoặc nhập trực tiếp</p>
+                
+                <!-- Input Section -->
+                <div class="input-section">
+                    <div class="input-group">
+                        <label for="jsonInput">Nhập dữ liệu JSON:</label>
+                        <textarea id="jsonInput" placeholder="Nhập dữ liệu JSON hoặc tải file lên..."></textarea>
+                    </div>
+                    
+                    <div class="file-upload-section">
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Kéo thả file vào đây hoặc <span class="click-upload">click để chọn file</span></p>
+                            <input type="file" id="fileInput" accept=".json,.txt" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="processing-options">
+                        <h3>Tùy chọn xử lý:</h3>
+                        <div class="options-grid">
+                            <label class="option-item">
+                                <input type="checkbox" id="removeDuplicates" checked>
+                                <span class="checkmark"></span>
+                                Loại bỏ câu hỏi trùng lặp
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" id="filterImages" checked>
+                                <span class="checkmark"></span>
+                                Lọc câu hỏi có hình ảnh
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" id="cleanHtml" checked>
+                                <span class="checkmark"></span>
+                                Làm sạch HTML
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button class="process-btn" onclick="processData()">
+                        <i class="fas fa-cogs"></i>
+                        Xử lý dữ liệu
+                    </button>
+                </div>
+                
+                <!-- Results Section -->
+                <div class="results-section" id="resultsSection" style="display: none;">
+                    <h3>Kết quả xử lý:</h3>
+                    <div class="results-summary">
+                        <div class="summary-item">
+                            <span class="label">Tổng câu hỏi:</span>
+                            <span class="value" id="totalQuestions">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Đã xử lý:</span>
+                            <span class="value" id="processedQuestions">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Trùng lặp:</span>
+                            <span class="value" id="duplicatesRemoved">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="questions-list" id="questionsList"></div>
+                    
+                    <div class="export-section">
+                        <button class="export-btn" onclick="showExportModal()">
+                            <i class="fas fa-download"></i>
+                            Xuất dữ liệu
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Xuất dữ liệu</h3>
+                <span class="close" onclick="closeExportModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <button class="export-btn" onclick="exportToTXT()">
+                        <i class="fas fa-file-alt"></i> Export as Text
+                    </button>
+                    <button class="export-btn" onclick="exportToWord()">
+                        <i class="fas fa-file-word"></i> Export as Word
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Animation -->
+    <div class="background-animation">
+        <div class="sky-gradient"></div>
+        <div class="stars-small"></div>
+        <div class="stars-medium"></div>
+        <div class="stars-large"></div>
+        <div class="shooting-stars"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
