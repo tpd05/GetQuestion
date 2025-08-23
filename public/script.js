@@ -1025,7 +1025,7 @@ style.textContent = `
 	.answer-item {
 		padding: 0.5rem 0;
 		border-bottom: 1px solid var(--border-light);
-		color: var(--text-secondary);
+		color: white;
 	}
 	
 	.answer-item:last-child {
