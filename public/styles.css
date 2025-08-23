@@ -338,11 +338,13 @@ body {
 }
 
 .action-btn {
-  padding: 1rem 2rem;
+  color: var(--warning-color);
+  padding: 12px 10px;
+  margin: 20px;
   border: none;
   border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 17.6px;
+  font-family: Arial, sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
@@ -399,6 +401,128 @@ body {
   font-size: 1.1rem;
 }
 
+/* Data frames styles */
+.data-frames-container {
+  width: 100%;
+}
+.data-frame {
+  width: 100%;
+}
+.frame-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.data-frames-controls .frames-header h3 {
+  margin: 0;
+}
+.data-frames-controls .action-btn {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* Make input-group and data-frame consistent */
+.input-group, .data-frame {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.input-group label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+#jsonInput {
+  width: 100%;
+  min-height: 160px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  resize: vertical;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+/* File upload area styling to match frames */
+.file-upload-section .file-upload-area {
+  background: linear-gradient(180deg, rgba(102,126,234,0.06), rgba(118,75,162,0.04));
+  border: 2px dashed rgba(102,126,234,0.35);
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.file-upload-section .file-upload-area:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(102,126,234,0.06);
+}
+
+.file-upload-section .file-upload-area i {
+  font-size: 2.4rem;
+  color: #667eea;
+  display:block;
+  margin-bottom: 0.6rem;
+}
+
+.data-frame .frame-textarea, .input-group .frame-textarea, #jsonInput.frame-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.frames-header h3 {
+  font-size: 1.05rem;
+}
+
+.data-frame .action-btn, .frames-header .action-btn, .input-section > div > .action-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.data-frame .action-btn:hover, .frames-header .action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Ensure new frames appear above file upload visually (container order handled in HTML) */
+.data-frames-container {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
 /* Input Section */
 .input-section {
   background: var(--glass-bg);
@@ -412,7 +536,7 @@ body {
 }
 
 .input-group {
-  margin-bottom: 2rem;
+  margin-bottom: 0px;
 }
 
 .input-group label {

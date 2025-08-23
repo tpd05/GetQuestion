@@ -19,6 +19,7 @@ function initializeApp() {
 	updateTheme();
 	initializeWeather();
 	initializeFileUpload();
+	initializeDataFrames();
 	
 	// Update time every second
 	setInterval(updateTime, 1000);
@@ -28,6 +29,86 @@ function initializeApp() {
 	
 	// Update theme every minute
 	setInterval(updateTheme, 60 * 1000);
+}
+
+// Multiple data frames support
+function initializeDataFrames() {
+	const addBtn = document.getElementById('addFrameBtn');
+	const container = document.getElementById('dataFramesContainer');
+
+	// Use existing #jsonInput as primary frame (do not create duplicate)
+	// If there are no additional frames, container may remain empty until user adds frames
+
+	if (addBtn) {
+		addBtn.addEventListener('click', () => {
+			const frame = createDataFrame(false);
+			container.appendChild(frame);
+			showSuccess('Đã thêm khung dữ liệu mới');
+		});
+	}
+}
+
+function createDataFrame(isPrimary) {
+	const frame = document.createElement('div');
+	frame.className = 'data-frame';
+	frame.style.cssText = 'background:var(--card-bg);padding:12px;border-radius:8px;box-shadow:0 2px 8px var(--shadow-color);';
+
+	const header = document.createElement('div');
+	header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;';
+
+	const title = document.createElement('div');
+	title.textContent = isPrimary ? 'Khung chính' : 'Nhập dữ liệu JSON:';
+	title.style.fontWeight = '600';
+
+	const actions = document.createElement('div');
+
+	// New frames do not include a per-frame file upload button; they only have textarea and remove button.
+
+	// Remove button (not for primary)
+	const removeBtn = document.createElement('button');
+	removeBtn.type = 'button';
+	removeBtn.className = 'action-btn';
+	removeBtn.style.padding = '6px 10px';
+	removeBtn.textContent = 'Xóa';
+	removeBtn.addEventListener('click', () => {
+		const container = document.getElementById('dataFramesContainer');
+		if (!isPrimary && container && frame.parentNode) {
+			container.removeChild(frame);
+			showSuccess('Đã xóa khung dữ liệu');
+		} else {
+			showError('Không thể xóa khung chính');
+		}
+	});
+
+	actions.appendChild(removeBtn);
+
+	header.appendChild(title);
+	header.appendChild(actions);
+
+	const textarea = document.createElement('textarea');
+	textarea.className = 'frame-textarea';
+	textarea.placeholder = isPrimary ? 'Nhập dữ liệu JSON hoặc tải file vào đây (khung chính)...' : 'Nhập dữ liệu JSON hoặc tải file lên...';
+	textarea.style.cssText = '  width: 100%; min-height: 160px; padding: 12px;border-radius: 8px;border: 1px solid var(--border-light);background: var(--input-bg);color: var(--text-primary);resize: vertical;font-family: monospace;font-size: 0.95rem;';
+
+	// If this frame is intended as primary, prefer using existing #jsonInput element instead of creating new textarea
+	if (isPrimary) {
+		const existing = document.getElementById('jsonInput');
+		if (existing) {
+			// Move existing textarea into frame container
+			existing.classList.add('frame-textarea');
+			existing.style.cssText += 'min-height:120px;';
+			frame.appendChild(header);
+			frame.appendChild(existing);
+			// Primary frame uses global #fileInput (click handled elsewhere)
+			// No need to append the hidden fileInput inside frame
+			return frame;
+		}
+	}
+
+	frame.appendChild(header);
+	frame.appendChild(textarea);
+
+	return frame;
 }
 
 // Time and greeting functions
@@ -558,46 +639,108 @@ function handleFileUpload(file) {
 
 // Data processing functions
 function processData() {
-	const jsonInput = document.getElementById('jsonInput').value.trim();
-	
-	if (!jsonInput) {
-		showError('Vui lòng nhập dữ liệu JSON hoặc tải file lên');
+	// Collect JSON from all frames
+	const container = document.getElementById('dataFramesContainer');
+	if (!container) {
+		showError('Không tìm thấy khung dữ liệu');
 		return;
 	}
-	
-	try {
-		const data = JSON.parse(jsonInput);
-		const options = {
-			removeDuplicates: document.getElementById('removeDuplicates').checked,
-			filterImages: document.getElementById('filterImages').checked,
-			cleanHtml: document.getElementById('cleanHtml').checked
-		};
-		
-		// Send to server for processing
-		fetch('/upload', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ data, options })
-		})
-		.then(response => response.json())
-		.then(result => {
-			if (result.success) {
-				processedQuestions = result.questions;
-				displayResults(result);
-				showSuccess('Dữ liệu đã được xử lý thành công!');
-			} else {
-				showError('Lỗi khi xử lý dữ liệu: ' + result.error);
-			}
-		})
-		.catch(error => {
-			showError('Lỗi kết nối: ' + error.message);
-		});
-		
-	} catch (error) {
-		showError('Dữ liệu JSON không hợp lệ: ' + error.message);
+
+	// Start with primary textarea (#jsonInput)
+	const primary = document.getElementById('jsonInput');
+	const additional = Array.from(container.querySelectorAll('.frame-textarea'));
+	// Combine: ensure primary first, then additionals; avoid duplicates
+	const textareas = [];
+	if (primary) textareas.push(primary);
+	additional.forEach(t => { if (t.id !== 'jsonInput') textareas.push(t); });
+	if (textareas.length === 0) {
+		showError('Vui lòng thêm ít nhất một khung dữ liệu');
+		return;
 	}
+
+	// Ensure at least one textarea contains non-empty JSON before processing
+	const hasContent = textareas.some(ta => String(ta.value || '').trim().length > 0);
+	if (!hasContent) {
+		showError('Chưa có dữ liệu nào trong các khung. Vui lòng nhập hoặc tải file vào ít nhất một khung trước khi xử lý.');
+		return;
+	}
+
+	const options = {
+		removeDuplicates: document.getElementById('removeDuplicates').checked,
+		filterImages: document.getElementById('filterImages').checked,
+		cleanHtml: document.getElementById('cleanHtml').checked
+	};
+
+	// Process each frame sequentially and aggregate results
+	const aggregate = { questions: [], totalProcessed: 0, duplicatesRemoved: 0 };
+
+	(async () => {
+		try {
+			for (const ta of textareas) {
+				const raw = String(ta.value || '').trim();
+				if (!raw) continue; // skip empty frames
+
+				let parsed;
+				try {
+					parsed = JSON.parse(raw);
+				} catch (err) {
+					showError('Một khung chứa JSON không hợp lệ: ' + err.message);
+					return;
+				}
+
+				const res = await fetch('/upload', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ data: parsed, options })
+				});
+
+				const result = await res.json();
+				if (!result.success) {
+					showError('Lỗi khi xử lý một khung: ' + (result.error || 'Không xác định'));
+					return;
+				}
+
+				// Aggregate
+				aggregate.questions = aggregate.questions.concat(result.questions || []);
+				aggregate.totalProcessed += result.totalProcessed || 0;
+				aggregate.duplicatesRemoved += result.duplicatesRemoved || 0;
+			}
+
+			// De-duplicate aggregated by originalId if removeDuplicates enabled
+			if (options.removeDuplicates) {
+				// Count before dedupe so we can add client-side removed duplicates to aggregate
+				const beforeCount = aggregate.questions.length;
+				const seen = new Set();
+				aggregate.questions = aggregate.questions.filter(q => {
+					// If no originalId, keep the item (can't reliably dedupe)
+					if (!q.originalId) return true;
+					if (seen.has(q.originalId)) return false;
+					seen.add(q.originalId);
+					return true;
+				});
+
+				// Compute how many were removed on the client and add to aggregate.duplicatesRemoved
+				const afterCount = aggregate.questions.length;
+				const clientRemoved = Math.max(0, beforeCount - afterCount);
+				aggregate.duplicatesRemoved = (aggregate.duplicatesRemoved || 0) + clientRemoved;
+
+				// Reassign sequential ids
+				aggregate.questions = aggregate.questions.map((q, idx) => ({ ...q, id: idx + 1 }));
+			} else {
+				aggregate.questions = aggregate.questions.map((q, idx) => ({ ...q, id: idx + 1 }));
+			}
+
+			// Update global and UI
+			processedQuestions = aggregate.questions;
+			displayResults({ questions: aggregate.questions, totalProcessed: aggregate.totalProcessed, duplicatesRemoved: aggregate.duplicatesRemoved });
+			showSuccess('Tất cả khung dữ liệu đã được xử lý!');
+
+		} catch (error) {
+			console.error('Error processing frames:', error);
+			showError('Lỗi khi xử lý dữ liệu: ' + (error.message || error));
+		}
+	})();
+    
 }
 
 function displayResults(result) {

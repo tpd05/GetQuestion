@@ -134,7 +134,23 @@
                         <label for="jsonInput">Nhập dữ liệu JSON:</label>
                         <textarea id="jsonInput" placeholder="Nhập dữ liệu JSON hoặc tải file lên..."></textarea>
                     </div>
+
+                                        <!-- Multiple Data Frames Controls (placed above file upload) -->
+                    <div class="data-frames-controls">
+                        <!-- <div class="frames-header" style="display:flex;align-items:center;gap:12px;margin-top:12px;margin-bottom:8px;">
+                            <h3 style="margin:0;color:var(--text-primary);">Khung dữ liệu</h3>
+                        </div> -->
+                        <div id="dataFramesContainer" class="data-frames-container" style="margin-top:8px;display:flex;flex-direction:column;gap:12px;">
+                            <!-- Frames will be injected here. The original textarea (#jsonInput) is used as the primary input. -->
+                        </div>
+                    </div>
+
+                    <div style="margin-top:0px;">
+                        <button id="addFrameBtn" class="action-btn" type="button">+ Thêm khung dữ liệu</button>
+                    </div>
                     
+
+
                     <div class="file-upload-section">
                         <div class="file-upload-area" id="fileUploadArea">
                             <i class="fas fa-cloud-upload-alt"></i>
