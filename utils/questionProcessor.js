@@ -49,7 +49,9 @@ function processQuestions(data, options = {}) {
       .replace(/<\/o:p>/gi, '') // Remove closing </o:p>
       .replace(/<br\s*\/?>(\n)?/gi, ' ') // Replace <br> with space
       .replace(/&nbsp;/gi, ' ') // Replace &nbsp; with space
-      .replace(/\s+/g, ' ') // Remove extra whitespace
+      .replace(/\s+/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>') // Remove extra whitespace
       .trim(); // Remove leading/trailing whitespace
     
     return cleaned;

@@ -80,13 +80,13 @@ async function generateWordDocument(questions) {
                   font: "Times New Roman"
                 })
               ],
-              spacing: {
-                after: 100
-              },
+              spacing: { after: 100 },
               indent: {
-                left: 720 // 0.5 inch indent for answers
+                left: 720,      // thụt lề 0.5 inch toàn đoạn
+                hanging: 360    // treo 0.25 inch để nội dung thẳng cột, không dạt về "A."
               }
             });
+
           }),
           // Removed metadata display per request
           
@@ -131,6 +131,8 @@ function sanitizeForWord(text) {
     .replace(/<\/u>/gi, '')
     .replace(/&nbsp;/gi, ' ')
     .replace(/\s+/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .trim();
 }
 
